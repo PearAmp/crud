@@ -7,12 +7,12 @@
   <title>Api-Data</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
-
-  <!-- nav-bar -->
+      <!-- nav-bar -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai&family=Syncopate&display=swap"
     rel="stylesheet">
+
 </head>
 <style>
   body {
@@ -44,18 +44,7 @@
   .sidenav a:hover {
     color: #f1f1f1;
   }
-  .btn  a {
-    color: #fff;
-    text-decoration: none;
-    font-family: 'IBM Plex Sans Thai', sans-serif;
-    
-  }
 
- 
-
- .btn a:hover {
-    color: #fff;
-  }
 
   @media screen and (min-width: 768px) and (max-width: 991px) {
     .container {
@@ -65,35 +54,45 @@
 
   }
 </style>
-
-<body onload="users_read()">
-
+<body onload="user_readone()">
   <div class="container-fluid">
     <div class="sidenav">
       <a href="index.html">หน้าแรก</a>
       <a href="edit.html">หน้าโปรโมชั่น</a>
-      <a href="create.html">หน้าเกี่ยวกับ</a>
+      <a href="#">หน้าเกี่ยวกับ</a>
     </div>
     <div class="container">
-      <div class="row">
-        <h1 class="text-center">USER</h1>
+      <div class="mt-5 row">
+        <h1>Create User</h1>
       </div>
-      <button type="button" class="btn btn-primary"><a href="create.html">เพิ่มข้อมูล</a></button>
-      <div class="row">
-        <table class="table">
-          <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Avatar</th>
-              <th scope="col">FirstName</th>
-              <th scope="col">LastName</th>
-              <th scope="col">Manage</th>
-            </tr>
-          </thead>
-          <tbody id="users_table">
-          </tbody>
-        </table>
-      </div>
+      <form onsubmit="return false">
+        <div class="mb-3">
+          <label for="id" class="form-label">ID</label>
+          <input type="text" class="form-control" id="id" disabled>
+        </div>
+  
+        <div class="mb-3">
+          <label for="fname" class="form-label">First Name</label>
+          <input type="text" class="form-control" id="fname">
+        </div>
+  
+        <div class="mb-3">
+          <label for="lname" class="form-label">Last Name</label>
+          <input type="text" class="form-control" id="lname">
+        </div>
+  
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input type="text" class="form-control" id="email">
+        </div>
+  
+        <div class="mb-3">
+          <label for="avatar" class="form-label">Avatar</label>
+          <input type="text" class="form-control" id="avatar">
+        </div>
+  
+        <button type="button" onclick="user_update()" class="btn btn-primary">Submit</button>
+      </form>
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
@@ -102,57 +101,52 @@
 </body>
 
 </html>
-
 <script>
-  var users_read = function () {
+  var user_readone = function () {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
     var requestOptions = {
       method: 'GET',
       redirect: 'follow'
     };
-    var users_table = document.getElementById('users_table');
-    users_table.innerHTML = 'Loading...';
 
-    fetch("http://localhost/crud/api/users/read.php", requestOptions)
+    fetch("http://localhost/crud/api/users/readone.php?id=" + id, requestOptions)
       .then(response => response.text())
       .then(result => {
-        users_table.innerHTML = '';
         var jsonObj = JSON.parse(result);
-        console.log(jsonObj);
-        for (let user of jsonObj) {
-          var row = `
-        <tr>
-            <td scope="col">`+ user.id + `</td>
-            <th scope="col"><img src="`+ user.avatar + `" width="50px" alt="` + user.fname + `"></td>
-            <td scope="col">`+ user.fname + `</td>
-            <td scope="col">`+ user.lname + `</td>
-            <td><button class="btn btn-info"><a href="edit.html?id=`+ user.id + `">Edit</a></button>
-               <button class="btn btn-danger"> <a href="#" onclick="user_delete(`+ user.id + `)">Delete</a></button>
-            </td>
-        </tr>
-        `;
-          users_table.insertAdjacentHTML('beforeend', row);
-        }
+        document.getElementById('id').value = jsonObj.id;
+        document.getElementById('fname').value = jsonObj.fname;
+        document.getElementById('lname').value = jsonObj.lname;
+        document.getElementById('email').value = jsonObj.email;
+        document.getElementById('avatar').value = jsonObj.avatar;
       })
       .catch(error => console.log('error', error));
 
   }
 
-  var user_delete = function (id) {
+
+
+
+  var user_update = function () {
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
     var raw = JSON.stringify({
-      "id": id
+      "id": document.getElementById('id').value,
+      "fname": document.getElementById('fname').value,
+      "lname": document.getElementById('lname').value,
+      "email": document.getElementById('email').value,
+      "avatar": document.getElementById('avatar').value
     });
 
     var requestOptions = {
-      method: 'DELETE',
+      method: 'PATCH',
       headers: myHeaders,
       body: raw,
       redirect: 'follow'
     };
 
-    fetch("http://localhost/crud/api/users/delete.php", requestOptions)
+    fetch("http://localhost/crud/api/users/update.php", requestOptions)
       .then(response => response.text())
       .then(result => {
         var jsonObj = JSON.parse(result);
@@ -165,5 +159,4 @@
       })
       .catch(error => console.log('error', error));
   }
-
 </script>
